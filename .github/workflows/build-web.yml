@@ -21,8 +21,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Install web dependencies
-      run: npx expo install react-dom react-native-web
 
     - name: Build web (export)
       env:
