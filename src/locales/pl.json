@@ -87,5 +87,18 @@
   "Unknown Category": "Nieznana kategoria",
   "Statistics": "Statystyki",
   "No expenses this month": "Brak wydatków w tym miesiącu",
-  "Income by category": "Dochody według kategorii"
+  "Income by category": "Dochody według kategorii",
+  "category_food": "Jedzenie",
+  "category_transport": "Transport",
+  "category_entertainment": "Rozrywka",
+  "category_shopping": "Zakupy",
+  "category_utilities": "Opłaty",
+  "category_health": "Zdrowie",
+  "category_education": "Edukacja",
+  "category_other": "Inne",
+  "category_salary": "Wynagrodzenie",
+  "category_bonus": "Premia",
+  "category_investments": "Inwestycje",
+  "category_freelance": "Freelance",
+  "category_gift": "Prezent"
 } 

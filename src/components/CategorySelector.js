@@ -18,7 +18,7 @@ export const CategorySelector = ({
   onSelect,
   style,
 }) => {
-  const { theme } = useApp();
+  const { theme, t } = useApp();
   const styles = makeStyles(theme);
 
   return (
@@ -53,7 +53,7 @@ export const CategorySelector = ({
               ]}
               numberOfLines={1}
             >
-              {category.name}
+              {t(category.nameKey) || category.nameKey}
             </Text>
           </TouchableOpacity>
         ))}

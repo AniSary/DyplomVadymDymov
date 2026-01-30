@@ -19,66 +19,66 @@
 
 ```
 finansowy-tracker/
-├── src/
-│   ├── components/        # Переиспользуемые UI компоненты
-│   │   ├── Button.js
-│   │   ├── Card.js
-│   │   ├── CategoryItem.js
-│   │   ├── CategorySelector.js
-│   │   ├── DatePicker.js
-│   │   ├── EmptyState.js
-│   │   ├── InputField.js
-│   │   ├── SectionHeader.js
-│   │   ├── TransactionItem.js
-│   │   ├── TypeSelector.js
-│   │   └── index.js
-│   │
-│   ├── screens/           # Основные экраны приложения
-│   │   ├── SplashScreen.js
-│   │   ├── DashboardScreen.js
-│   │   ├── AddTransactionScreen.js
-│   │   ├── TransactionsScreen.js
-│   │   ├── CategoriesScreen.js
-│   │   ├── StatisticsScreen.js
-│   │   ├── SettingsScreen.js
-│   │   └── index.js
-│   │
-│   ├── context/           # React Context для управления состоянием
-│   │   └── AppContext.js
-│   │
-│   ├── services/          # Сервисы для работы с данными
-│   │   └── StorageService.js
-│   │
-│   ├── utils/             # Утилиты и вспомогательные функции
-│   │   ├── dateUtils.js
-│   │   ├── moneyUtils.js
-│   │   └── validation.js
-│   │
-│   ├── constants/         # Константы приложения
-│   │   ├── colors.js
-│   │   ├── categories.js
-│   │   └── currencies.js
-│   │
-│   └── navigation/        # Навигация между экранами
-│       └── Navigation.js
-│
-├── App.js                 # Корневой компонент приложения
-├── app.json              # Конфигурация Expo
-├── package.json          # Зависимости проекта
-└── README.md             # Документация
+# 💰 Finansowy Tracker
+
+W pełni funkcjonalna aplikacja mobilna do zarządzania finansami osobistymi. Aplikacja działa całkowicie offline z lokalnym przechowywaniem danych na urządzeniu.
+
+## 📱 Funkcje
+
+- ✅ **Całkowicie offline** – wszystkie dane są przechowywane lokalnie na urządzeniu
+- ✅ **Wieloplatformowość** – działa na iOS i Android
+- ✅ **Zarządzanie przychodami i wydatkami** – dodawaj, edytuj i usuwaj transakcje
+- ✅ **Kategoryzacja** – twórz i zarządzaj kategoriami przychodów i wydatków
+- ✅ **Analiza** – przeglądaj statystyki i wykresy
+- ✅ **Wiele walut** – obsługa 7 głównych walut
+- ✅ **Elastyczne ustawienia** – wybór motywu, waluty i innych parametrów
+- ✅ **Bezpieczeństwo** – wszystkie dane są przechowywane lokalnie, nie są przesyłane na serwery
+
+## 🏗️ Architektura
+
+### Struktura projektu
+
 ```
-
-### Ключевые компоненты
-
-#### 1. **AppContext** - Управление состоянием
-- Централизованное хранилище всех данных приложения
-- Методы для работы с транзакциями, категориями и настройками
-- Вычисление статистики в реальном времени
-
-#### 2. **StorageService** - Локальное хранилище
-- Использует AsyncStorage для сохранения данных
-- CRUD операции для транзакций, категорий и настроек
-- Экспорт и импорт данных
+finansowy-tracker/
+├── src/
+|   ├── components/        # Współdzielone komponenty UI
+|   |   ├── Button.js
+|   |   ├── Card.js
+|   |   ├── CategoryItem.js
+|   |   ├── CategorySelector.js
+|   |   ├── DatePicker.js
+|   |   ├── EmptyState.js
+|   |   ├── InputField.js
+|   |   ├── SectionHeader.js
+|   |   ├── TransactionItem.js
+|   |   ├── TypeSelector.js
+|   |   └── index.js
+|   |
+|   ├── screens/           # Główne ekrany aplikacji
+|   |   ├── SplashScreen.js
+|   |   ├── DashboardScreen.js
+|   |   ├── AddTransactionScreen.js
+|   |   ├── TransactionsScreen.js
+|   |   ├── CategoriesScreen.js
+|   |   ├── StatisticsScreen.js
+|   |   ├── SettingsScreen.js
+|   |   └── index.js
+|   |
+|   ├── context/           # React Context do zarządzania stanem
+|   |   └── AppContext.js
+|   |
+|   ├── services/          # Serwisy do obsługi danych
+|   |   └── StorageService.js
+|   |
+|   ├── utils/             # Narzędzia i funkcje pomocnicze
+|   |   ├── dateUtils.js
+|   |   ├── moneyUtils.js
+|   |   └── validation.js
+|   |
+|   ├── constants/         # Stałe aplikacji
+|   |   ├── colors.js
+|   |   ├── categories.js
+|   |   └── currencies.js
 
 #### 3. **Navigation** - Маршрутизация
 - Bottom Tab Navigator для основной навигации

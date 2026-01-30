@@ -87,5 +87,18 @@
   "Unknown Category": "Неизвестная категория",
   "Statistics": "Статистика",
   "No expenses this month": "Нет расходов в этом месяце",
-  "Income by category": "Доходы по категориям"
+  "Income by category": "Доходы по категориям",
+  "category_food": "Еда",
+  "category_transport": "Транспорт",
+  "category_entertainment": "Развлечения",
+  "category_shopping": "Покупки",
+  "category_utilities": "Коммунальные",
+  "category_health": "Здоровье",
+  "category_education": "Образование",
+  "category_other": "Другое",
+  "category_salary": "Зарплата",
+  "category_bonus": "Бонус",
+  "category_investments": "Инвестиции",
+  "category_freelance": "Фриланс",
+  "category_gift": "Подарок"
 } 
