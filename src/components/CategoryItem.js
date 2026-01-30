@@ -40,7 +40,7 @@ export const CategoryItem = ({
         </View>
         
         <View style={styles.info}>
-          <Text style={styles.name}>{category.name}</Text>
+          <Text style={styles.name}>{(category.nameKey && t(category.nameKey)) || category.name}</Text>
           <Text style={styles.type}>
             {category.type === 'income' ? t('Income') || 'Income' : t('Expense') || 'Expense'}
           </Text>

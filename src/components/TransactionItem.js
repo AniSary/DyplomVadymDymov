@@ -41,7 +41,7 @@ export const TransactionItem = ({
         
         <View style={styles.info}>
           <Text style={styles.category} numberOfLines={1}>
-            {category?.name || t('Unknown Category')}
+            {(category && category.nameKey && t(category.nameKey)) || category?.name || t('Unknown Category')}
           </Text>
           <Text style={styles.date}>
             {formatDate(transaction.date)} {formatTime(transaction.date)}
