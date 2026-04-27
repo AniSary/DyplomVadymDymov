@@ -64,11 +64,16 @@ export class DatabaseService {
         updatedAt TEXT NOT NULL,
         deviceId TEXT,
         isDeleted BOOLEAN DEFAULT 0,
-        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_userId (userId),
-        INDEX idx_date (date),
-        INDEX idx_version (version)
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       )
+    `);
+
+    // Индексы для таблицы transactions
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_userId ON transactions(userId);
+      CREATE INDEX IF NOT EXISTS idx_date ON transactions(date);
+      CREATE INDEX IF NOT EXISTS idx_version ON transactions(version);
+      CREATE INDEX IF NOT EXISTS idx_userId_date ON transactions(userId, date);
     `);
 
     // Таблица для отслеживания синхронизации
@@ -81,9 +86,15 @@ export class DatabaseService {
         action TEXT NOT NULL,
         timestamp TEXT NOT NULL,
         version INTEGER,
-        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_userId_timestamp (userId, timestamp)
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       )
+    `);
+
+    // Индексы для таблицы sync_log
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_sync_userId ON sync_log(userId);
+      CREATE INDEX IF NOT EXISTS idx_sync_timestamp ON sync_log(timestamp);
+      CREATE INDEX IF NOT EXISTS idx_sync_userId_timestamp ON sync_log(userId, timestamp);
     `);
 
     // Таблица для кэширования аналитики (для оптимизации)
@@ -95,10 +106,16 @@ export class DatabaseService {
         metric TEXT NOT NULL,
         value REAL,
         cachedAt TEXT NOT NULL,
-        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
         UNIQUE (userId, period, metric),
-        INDEX idx_userId_period (userId, period)
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       )
+    `);
+
+    // Индексы для таблицы analytics_cache
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_analytics_userId ON analytics_cache(userId);
+      CREATE INDEX IF NOT EXISTS idx_analytics_period ON analytics_cache(period);
+      CREATE INDEX IF NOT EXISTS idx_analytics_userId_period ON analytics_cache(userId, period);
     `);
   }
 
