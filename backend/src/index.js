@@ -66,7 +66,7 @@ async function startServer() {
     await DatabaseService.init(DB_PATH);
     console.log('✅ Database initialized');
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`
 ╔════════════════════════════════════════════════╗
 ║   Finansowy Tracker Backend Server Running     ║

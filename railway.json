@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd backend && npm install",
+  "startCommand": "cd backend && node src/index.js",
+  "envs": {
+    "NODE_ENV": "production",
+    "PORT": "3000",
+    "DB_PATH": "./data/tracker.db"
+  }
+}

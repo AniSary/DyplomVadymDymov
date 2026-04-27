@@ -1,0 +1,19 @@
+{
+  "name": "finansowy-tracker-backend",
+  "version": "1.0.0",
+  "description": "Backend for Finansowy Tracker with sync and analytics",
+  "main": "backend/src/index.js",
+  "engines": {
+    "node": "18.x",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "start": "cd backend && node src/index.js",
+    "dev": "cd backend && node --watch src/index.js",
+    "install": "cd backend && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["finance", "tracking", "sync", "analytics"],
+  "author": "",
+  "license": "MIT"
+}
