@@ -27,7 +27,7 @@ export default function AdvancedAnalyticsScreen() {
     );
   }
 
-  const { theme, transactions = [] } = context;
+  const { theme, transactions = [], t } = context;
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -83,6 +83,17 @@ export default function AdvancedAnalyticsScreen() {
 
   const styles = makeStyles(theme);
 
+  // Получаем рекомендацию на основе трендов
+  const getRecommendation = () => {
+    if (analytics.changePercent > 10) {
+      return t('Expenses growing!') || 'Расходы растут! Пересмотрите бюджет';
+    } else if (analytics.changePercent < -10) {
+      return t('Good savings!') || 'Хорошая экономия!';
+    } else {
+      return t('Expenses are stable') || 'Расходы стабильны';
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView 
@@ -91,30 +102,30 @@ export default function AdvancedAnalyticsScreen() {
       >
         {/* Заголовок */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>📊 Аналитика</Text>
+          <Text style={styles.headerTitle}>📊 {t('Analytics') || 'Аналитика'}</Text>
         </View>
 
         {/* Основные цифры */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Сводка за месяц</Text>
+          <Text style={styles.sectionTitle}>{t('Monthly Summary') || 'Сводка за месяц'}</Text>
           
           <View style={styles.statsGrid}>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Доход</Text>
+              <Text style={styles.statLabel}>{t('Income') || 'Доход'}</Text>
               <Text style={[styles.statValue, { color: '#27AE60' }]}>
                 +{analytics.totalIncome.toFixed(2)}
               </Text>
             </View>
             
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Расход</Text>
+              <Text style={styles.statLabel}>{t('Expenses') || 'Расход'}</Text>
               <Text style={[styles.statValue, { color: '#E74C3C' }]}>
                 -{analytics.totalExpense.toFixed(2)}
               </Text>
             </View>
             
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Баланс</Text>
+              <Text style={styles.statLabel}>{t('Balance') || 'Баланс'}</Text>
               <Text style={[
                 styles.statValue, 
                 { color: analytics.balance >= 0 ? '#27AE60' : '#E74C3C' }
@@ -127,11 +138,11 @@ export default function AdvancedAnalyticsScreen() {
 
         {/* Тренды */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Тренды расходов</Text>
+          <Text style={styles.sectionTitle}>{t('Expense Trends') || 'Тренды расходов'}</Text>
           
           <View style={styles.trendBox}>
             <View style={styles.trendHeader}>
-              <Text style={styles.trendLabel}>Изменение:</Text>
+              <Text style={styles.trendLabel}>{t('Change') || 'Изменение:'}</Text>
               <Text style={[
                 styles.trendValue,
                 { color: analytics.changePercent < 0 ? '#27AE60' : '#E74C3C' }
@@ -140,19 +151,17 @@ export default function AdvancedAnalyticsScreen() {
               </Text>
             </View>
             <Text style={styles.recommendation}>
-              💡 {analytics.changePercent > 10 ? 'Расходы растут! Пересмотрите бюджет' :
-                    analytics.changePercent < -10 ? 'Хорошая экономия!' :
-                    'Расходы стабильны'}
+              💡 {getRecommendation()}
             </Text>
           </View>
         </View>
 
         {/* Прогноз */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Прогноз на следующий месяц</Text>
+          <Text style={styles.sectionTitle}>{t('Forecast for next month') || 'Прогноз на следующий месяц'}</Text>
           
           <View style={styles.forecastBox}>
-            <Text style={styles.forecastLabel}>Предполагаемые расходы:</Text>
+            <Text style={styles.forecastLabel}>{t('Estimated expenses') || 'Предполагаемые расходы:'}</Text>
             <Text style={styles.forecastValue}>
               {analytics.totalExpense.toFixed(2)}
             </Text>
@@ -160,7 +169,7 @@ export default function AdvancedAnalyticsScreen() {
               <View style={[styles.confidenceFill, { width: '70%' }]} />
             </View>
             <Text style={styles.confidenceText}>
-              Уверенность: 70%
+              {t('Confidence') || 'Уверенность:'} 70%
             </Text>
           </View>
         </View>
