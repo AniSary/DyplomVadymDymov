@@ -14,7 +14,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { Card, Button, SectionHeader, EmptyState } from '../components';
+import { Card, Button, SectionHeader, EmptyState, SafeText } from '../components';
 import { formatCurrency } from '../utils/moneyUtils';
 import { isThisMonth } from '../utils/dateUtils';
 
@@ -73,12 +73,12 @@ const DashboardScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('App Name')}</Text>
+        <SafeText style={styles.headerTitle}>{t('App Name')}</SafeText>
         <TouchableOpacity
           onPress={() => navigation.navigate('Settings')}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.settingsIcon}>⚙️</Text>
+          <SafeText style={styles.settingsIcon}>⚙️</SafeText>
         </TouchableOpacity>
       </View>
 
@@ -121,14 +121,14 @@ const DashboardScreen = ({ navigation }) => {
             {topCategories.map(({ category, amount }, index) => (
               <View key={index} style={styles.categoryRow}>
                 <View style={styles.categoryInfo}>
-                  <Text style={styles.categoryIcon}>{category?.icon}</Text>
-                  <Text style={styles.categoryName}>
+                  <SafeText style={styles.categoryIcon}>{category?.icon}</SafeText>
+                  <SafeText style={styles.categoryName}>
                     {category && (category.nameKey ? t(category.nameKey) : (category.name && tAutoTranslate(category.name, 'en')) || 'Unknown')}
-                  </Text>
+                  </SafeText>
                 </View>
-                <Text style={styles.categoryAmount}>
+                <SafeText style={styles.categoryAmount}>
                   {formatCurrency(amount, currency)}
-                </Text>
+                </SafeText>
               </View>
             ))}
           </>
@@ -155,21 +155,21 @@ const DashboardScreen = ({ navigation }) => {
                   style={styles.transactionRow}
                 >
                   <View style={styles.transactionLeft}>
-                    <Text style={styles.transactionIcon}>
+                    <SafeText style={styles.transactionIcon}>
                       {category?.icon || '📌'}
-                    </Text>
+                    </SafeText>
                     <View>
-                      <Text style={styles.transactionCategory}>
+                      <SafeText style={styles.transactionCategory}>
                         {categoryName}
-                      </Text>
+                      </SafeText>
                       {transaction.comment && (
-                        <Text style={styles.transactionComment}>
+                        <SafeText style={styles.transactionComment}>
                           {transaction.comment}
-                        </Text>
+                        </SafeText>
                       )}
                     </View>
                   </View>
-                  <Text
+                  <SafeText
                     style={[
                       styles.transactionAmount,
                       {
@@ -181,7 +181,7 @@ const DashboardScreen = ({ navigation }) => {
                   >
                     {transaction.type === 'income' ? '+' : '-'}
                     {formatCurrency(transaction.amount, currency)}
-                  </Text>
+                  </SafeText>
                 </View>
               );
             })}

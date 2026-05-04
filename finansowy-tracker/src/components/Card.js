@@ -39,6 +39,10 @@ const makeStyles = (cardDimensions, size) => {
       shadowOpacity: 0.1,
       shadowRadius: 3,
       elevation: 3,
+      // Web-specific styles
+      ...(typeof window !== 'undefined' && {
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      }),
     },
     title: {
       fontSize: titleFontSize,

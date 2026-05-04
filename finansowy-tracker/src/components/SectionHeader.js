@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { getResponsiveFontSize, getResponsivePadding } from '../utils/responsiveUtils';
+import { SafeText } from './SafeText';
 
 export const SectionHeader = ({ title, action, style }) => {
   const { theme } = useApp();
@@ -17,8 +18,8 @@ export const SectionHeader = ({ title, action, style }) => {
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={styles.title}>{title}</Text>
-      {action && <Text style={styles.action}>{action}</Text>}
+      <SafeText style={styles.title}>{title}</SafeText>
+      {action && <SafeText style={styles.action}>{action}</SafeText>}
     </View>
   );
 };

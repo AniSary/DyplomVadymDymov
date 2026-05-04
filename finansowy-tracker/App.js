@@ -13,6 +13,8 @@ import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AppProvider, useApp } from './src/context/AppContext';
 import { Navigation } from './src/navigation/Navigation';
+// Подавляем ненужные warnings для Web платформы
+import './src/utils/webWarningFix';
 
 // Внутренний компонент для доступа к контексту (тему)
 const AppContent = () => {

@@ -12,3 +12,4 @@ export { DatePicker } from './DatePicker';
 export { EmptyState } from './EmptyState';
 export { CategoryItem } from './CategoryItem';
 export { SectionHeader } from './SectionHeader';
+export { SafeText } from './SafeText';
