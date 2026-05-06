@@ -5,21 +5,28 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import DatabaseService from '../services/DatabaseService.js';
 import SyncEngine from '../services/SyncEngine.js';
+import { validateTransaction, validateUserId as validateUserIdFunc, APIError } from '../middleware/validation.js';
 
 const router = express.Router();
 const syncEngine = new SyncEngine('last-write-wins');
 
 // Middleware для проверки userId (в реальном приложении здесь была бы аутентификация)
-const validateUserId = (req, res, next) => {
+const validateUserIdMiddleware = (req, res, next) => {
   const userId = req.headers['x-user-id'] || req.query.userId;
-  if (!userId) {
-    return res.status(401).json({ error: 'Missing userId' });
+  if (!validateUserIdFunc(userId)) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        code: 'INVALID_USER_ID',
+        message: 'Missing or invalid userId header'
+      }
+    });
   }
   req.userId = userId;
   next();
 };
 
-router.use(validateUserId);
+router.use(validateUserIdMiddleware);
 
 /**
  * POST /api/sync/push
@@ -29,8 +36,25 @@ router.post('/push', async (req, res) => {
   try {
     const { transactions, deviceId, lastSyncTime } = req.body;
 
+    // Валидация входных данных
     if (!transactions || !Array.isArray(transactions)) {
-      return res.status(400).json({ error: 'Invalid transactions array' });
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'transactions must be an array'
+        }
+      });
+    }
+
+    if (!deviceId || typeof deviceId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'deviceId is required'
+        }
+      });
     }
 
     const results = {
@@ -41,6 +65,17 @@ router.post('/push', async (req, res) => {
 
     for (const tx of transactions) {
       try {
+        // Валидируем каждую транзакцию
+        const validation = validateTransaction(tx);
+        if (!validation.isValid) {
+          results.errors.push({
+            transactionId: tx.id,
+            code: 'VALIDATION_ERROR',
+            errors: validation.errors
+          });
+          continue;
+        }
+
         const existingTx = await DatabaseService.getTransaction(req.userId, tx.id);
 
         if (existingTx) {
@@ -63,6 +98,7 @@ router.post('/push', async (req, res) => {
             // Сервер имеет более свежую версию - конфликт
             results.conflicts.push({
               id: tx.id,
+              code: 'VERSION_CONFLICT',
               serverVersion: existingTx.toJSON(),
               clientVersion: tx
             });
@@ -79,6 +115,7 @@ router.post('/push', async (req, res) => {
       } catch (err) {
         results.errors.push({
           transactionId: tx.id,
+          code: 'PROCESSING_ERROR',
           error: err.message
         });
       }
@@ -86,12 +123,18 @@ router.post('/push', async (req, res) => {
 
     res.json({
       success: true,
-      results,
+      data: results,
       serverTime: new Date().toISOString()
     });
   } catch (error) {
     console.error('Push sync error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Internal server error during push sync'
+      }
+    });
   }
 });
 
@@ -103,15 +146,35 @@ router.post('/pull', async (req, res) => {
   try {
     const { lastSyncTime, deviceId } = req.body;
 
-    // Получаем все транзакции (в реальном приложении нужна пагинация)
+    if (!deviceId || typeof deviceId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'deviceId is required'
+        }
+      });
+    }
+
+    // Получаем все транзакции
     const allTransactions = await DatabaseService.getTransactions(req.userId);
     const deletedTransactions = await DatabaseService.getDeletedTransactions(req.userId, lastSyncTime);
 
     // Фильтруем только измененные после lastSyncTime
     let changedTransactions = allTransactions;
     if (lastSyncTime) {
+      const lastSync = new Date(lastSyncTime);
+      if (isNaN(lastSync.getTime())) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'lastSyncTime must be a valid ISO date'
+          }
+        });
+      }
       changedTransactions = allTransactions.filter(t => 
-        new Date(t.updatedAt) > new Date(lastSyncTime)
+        new Date(t.updatedAt) > lastSync
       );
     }
 
@@ -133,7 +196,13 @@ router.post('/pull', async (req, res) => {
     });
   } catch (error) {
     console.error('Pull sync error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Internal server error during pull sync'
+      }
+    });
   }
 });
 
@@ -144,6 +213,26 @@ router.post('/pull', async (req, res) => {
 router.post('/merge', async (req, res) => {
   try {
     const { localTransactions, lastSyncTime, deviceId } = req.body;
+
+    if (!Array.isArray(localTransactions)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'localTransactions must be an array'
+        }
+      });
+    }
+
+    if (!deviceId || typeof deviceId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'deviceId is required'
+        }
+      });
+    }
 
     // Получаем удаленные транзакции с сервера
     const serverTransactions = await DatabaseService.getTransactions(req.userId);
@@ -159,7 +248,8 @@ router.post('/merge', async (req, res) => {
     // Применяем операции
     const results = {
       applied: [],
-      conflicts: []
+      conflicts: [],
+      errors: []
     };
 
     for (const op of operations) {
@@ -198,7 +288,11 @@ router.post('/merge', async (req, res) => {
             break;
         }
       } catch (err) {
-        console.error('Error applying operation:', err);
+        results.errors.push({
+          operationId: op.id,
+          code: 'PROCESSING_ERROR',
+          error: err.message
+        });
       }
     }
 
@@ -206,13 +300,21 @@ router.post('/merge', async (req, res) => {
 
     res.json({
       success: true,
-      results,
-      stats,
+      data: {
+        results,
+        stats
+      },
       serverTime: new Date().toISOString()
     });
   } catch (error) {
     console.error('Merge error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Internal server error during merge'
+      }
+    });
   }
 });
 
@@ -238,6 +340,20 @@ router.get('/status', async (req, res) => {
     console.error('Status check error:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+/**
+ * GET /api/sync/health
+ * Health check endpoint для проверки доступности API
+ */
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 'sync-api',
+    version: '2.0.0'
+  });
 });
 
 export default router;

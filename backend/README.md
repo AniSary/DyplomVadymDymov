@@ -47,7 +47,79 @@ PORT=3001
 NODE_ENV=development
 DB_PATH=./data/tracker.db
 SYNC_CONFLICT_STRATEGY=last-write-wins
+CORS_ORIGIN=*
+LOG_LEVEL=info
 ```
+
+### 3. Запустить сервер
+
+```bash
+# Development mode с автоперезагрузкой
+npm run dev
+
+# Production mode
+npm start
+```
+
+После запуска сервер будет доступен на `http://localhost:3001`
+
+### 4. Проверить здоровье сервера
+
+```bash
+curl http://localhost:3001/health
+```
+
+Expected response:
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "service": "finansowy-tracker-backend",
+  "version": "2.0.0"
+}
+```
+
+---
+
+## 📡 API Endpoints
+
+### Authentication
+Все requests требуют заголовок:
+```
+x-user-id: {userId}
+```
+
+### Sync API (`/api/sync`)
+- `POST /sync/push` - Отправить изменения на сервер
+- `POST /sync/pull` - Получить изменения с сервера
+- `POST /sync/merge` - Разрешить конфликты
+- `GET /sync/health` - Проверка здоровья sync API
+
+### Analytics API (`/api/analytics`)
+- `GET /analytics/summary?period=month` - Сводная статистика
+- `GET /analytics/trends` - Анализ трендов
+- `GET /analytics/forecast` - Прогноз расходов
+- `GET /analytics/recommendations` - Рекомендации по сбережениям
+- `GET /analytics/health` - Проверка здоровья analytics API
+
+**📖 Полная документация API:** См. [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+
+---
+
+## 🗄️ База данных
+
+### Структура БД
+- **transactions** - Таблица с транзакциями
+  - id, userId, type (income/expense), amount, category, date, description, version, deviceId, createdAt, updatedAt, isDeleted
+
+- **sync_log** - Лог всех синхронизаций
+  - id, userId, action, transactionId, details, timestamp
+
+- **Indexes** для быстрого поиска:
+  - userId, version, updatedAt, deviceId
+
+### Инициализация БД
+База данных автоматически создается и инициализируется при первом запуске сервера.
 
 ### 3. Запустить сервер
 

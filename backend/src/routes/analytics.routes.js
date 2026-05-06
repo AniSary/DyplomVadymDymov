@@ -4,20 +4,27 @@
 import express from 'express';
 import DatabaseService from '../services/DatabaseService.js';
 import AnalyticsEngine from '../services/AnalyticsEngine.js';
+import { validatePeriod, validateUserId as validateUserIdFunc } from '../middleware/validation.js';
 
 const router = express.Router();
 
 // Middleware для проверки userId
-const validateUserId = (req, res, next) => {
+const validateUserIdMiddleware = (req, res, next) => {
   const userId = req.headers['x-user-id'] || req.query.userId;
-  if (!userId) {
-    return res.status(401).json({ error: 'Missing userId' });
+  if (!validateUserIdFunc(userId)) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        code: 'INVALID_USER_ID',
+        message: 'Missing or invalid userId header'
+      }
+    });
   }
   req.userId = userId;
   next();
 };
 
-router.use(validateUserId);
+router.use(validateUserIdMiddleware);
 
 /**
  * GET /api/analytics/summary?period=month
@@ -26,9 +33,26 @@ router.use(validateUserId);
 router.get('/summary', async (req, res) => {
   try {
     const { period = 'month' } = req.query;
+    
+    // Валидируем период
+    const validPeriod = validatePeriod(period);
+    
     const transactions = await DatabaseService.getTransactions(req.userId);
     
-    const stats = AnalyticsEngine.calculatePeriodStats(transactions, period);
+    if (!transactions || transactions.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          period: validPeriod,
+          totalIncome: 0,
+          totalExpense: 0,
+          balance: 0,
+          transactionCount: 0
+        }
+      });
+    }
+    
+    const stats = AnalyticsEngine.calculatePeriodStats(transactions, validPeriod);
 
     res.json({
       success: true,
@@ -36,7 +60,13 @@ router.get('/summary', async (req, res) => {
     });
   } catch (error) {
     console.error('Summary analytics error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'ANALYTICS_ERROR',
+        message: 'Error calculating summary statistics'
+      }
+    });
   }
 });
 
@@ -48,6 +78,16 @@ router.get('/trends', async (req, res) => {
   try {
     const transactions = await DatabaseService.getTransactions(req.userId);
     
+    if (!transactions || transactions.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          monthlyTrends: [],
+          categoryTrends: []
+        }
+      });
+    }
+    
     const trends = AnalyticsEngine.calculateTrends(transactions);
 
     res.json({
@@ -56,7 +96,13 @@ router.get('/trends', async (req, res) => {
     });
   } catch (error) {
     console.error('Trends analytics error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'ANALYTICS_ERROR',
+        message: 'Error calculating trends'
+      }
+    });
   }
 });
 
@@ -68,6 +114,17 @@ router.get('/forecast', async (req, res) => {
   try {
     const transactions = await DatabaseService.getTransactions(req.userId);
     
+    if (!transactions || transactions.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          predictedExpenses: 0,
+          confidence: 0,
+          basedOnMonths: 0
+        }
+      });
+    }
+    
     const forecast = AnalyticsEngine.predictNextMonthExpenses(transactions);
 
     res.json({
@@ -76,7 +133,13 @@ router.get('/forecast', async (req, res) => {
     });
   } catch (error) {
     console.error('Forecast analytics error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'ANALYTICS_ERROR',
+        message: 'Error generating forecast'
+      }
+    });
   }
 });
 
@@ -88,6 +151,16 @@ router.get('/recommendations', async (req, res) => {
   try {
     const transactions = await DatabaseService.getTransactions(req.userId);
     
+    if (!transactions || transactions.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          recommendations: [],
+          savingsPotential: 0
+        }
+      });
+    }
+    
     const recommendations = AnalyticsEngine.generateSavingsRecommendations(transactions);
 
     res.json({
@@ -96,8 +169,15 @@ router.get('/recommendations', async (req, res) => {
     });
   } catch (error) {
     console.error('Recommendations error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'ANALYTICS_ERROR',
+        message: 'Error generating recommendations'
+      }
+    });
   }
+});
 });
 
 /**
@@ -126,8 +206,28 @@ router.get('/comparison', async (req, res) => {
     });
   } catch (error) {
     console.error('Comparison analytics error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'ANALYTICS_ERROR',
+        message: 'Error performing comparison analysis'
+      }
+    });
   }
+});
+
+/**
+ * GET /api/analytics/health
+ * Health check endpoint
+ */
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 'analytics-api',
+    version: '2.0.0'
+  });
 });
 
 export default router;
