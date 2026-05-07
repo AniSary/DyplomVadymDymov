@@ -36,19 +36,24 @@ const StatisticsScreen = ({ navigation }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [expenseData, setExpenseData] = useState({});
   const [incomeData, setIncomeData] = useState({});
+  const [monthlyExpenses, setMonthlyExpenses] = useState(0);
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
 
-  // Aktualizuj dane, gdy ekran jest aktywny
+  // Aktualizuj dane, gdy ekran jest aktywny lub zmieni się miesiąc
   useFocusEffect(
     useCallback(() => {
       const expenses = getExpensesByCategory(selectedMonth);
       const incomes = getIncomeByCategory(selectedMonth);
+      const expensesTotal = getMonthlyExpenses(selectedMonth);
+      const incomeTotal = getMonthlyIncome(selectedMonth);
+      
       setExpenseData(expenses);
       setIncomeData(incomes);
-    }, [selectedMonth, getExpensesByCategory, getIncomeByCategory])
+      setMonthlyExpenses(expensesTotal);
+      setMonthlyIncome(incomeTotal);
+    }, [selectedMonth, getExpensesByCategory, getIncomeByCategory, getMonthlyExpenses, getMonthlyIncome])
   );
 
-  const monthlyExpenses = getMonthlyExpenses();
-  const monthlyIncome = getMonthlyIncome();
   const currency = settings.currency || 'USD';
 
   // Sortuj kategorie według sumy

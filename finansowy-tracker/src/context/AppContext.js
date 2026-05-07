@@ -235,13 +235,27 @@ export const AppProvider = ({ children }) => {
     return calculateBalance(transactions);
   }, [transactions]);
 
-  const getMonthlyExpenses = useCallback(() => {
-    const monthlyTransactions = transactions.filter(t => isThisMonth(t.date));
+  const getMonthlyExpenses = useCallback((monthDate = new Date()) => {
+    const monthlyTransactions = transactions.filter(t => {
+      const transDate = new Date(t.date);
+      return (
+        transDate.getMonth() === monthDate.getMonth() &&
+        transDate.getFullYear() === monthDate.getFullYear() &&
+        t.type === 'expense'
+      );
+    });
     return calculateMonthlyExpenses(monthlyTransactions);
   }, [transactions]);
 
-  const getMonthlyIncome = useCallback(() => {
-    const monthlyTransactions = transactions.filter(t => isThisMonth(t.date));
+  const getMonthlyIncome = useCallback((monthDate = new Date()) => {
+    const monthlyTransactions = transactions.filter(t => {
+      const transDate = new Date(t.date);
+      return (
+        transDate.getMonth() === monthDate.getMonth() &&
+        transDate.getFullYear() === monthDate.getFullYear() &&
+        t.type === 'income'
+      );
+    });
     return calculateMonthlyIncome(monthlyTransactions);
   }, [transactions]);
 
