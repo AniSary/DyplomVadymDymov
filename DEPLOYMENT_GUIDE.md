@@ -1,251 +1,298 @@
-# Deployment Guide
+# Build & APK Generation Guide
 
-Полный гайд для развертывания приложения на продакшене.
+Полный гайд для сборки приложения в APK и запуска локально.
 
-## 🚀 Backend Deployment (Railway)
+## 🚀 Быстрый старт (локальный)
 
-### 1. Подготовка
-
-Убедитесь что у вас есть:
-- GitHub account
-- Railway account (railway.app)
-- Git установлен
-
-### 2. Первый раз через UI Railway
-
-1. Открыть [Railway.app](https://railway.app)
-2. Нажать "Start a New Project"
-3. Выбрать "Deploy from GitHub repo"
-4. Авторизоваться с GitHub
-5. Выбрать репозиторий `DyplomVadymDymov`
-6. Railway автоматически обнаружит `backend/package.json`
-7. Настроить переменные окружения:
-   ```
-   PORT=3001
-   NODE_ENV=production
-   DB_PATH=./data/tracker.db
-   SYNC_CONFLICT_STRATEGY=last-write-wins
-   CORS_ORIGIN=https://your-frontend-domain.com
-   LOG_LEVEL=info
-   ```
-8. Нажать Deploy
-9. После успешного deploy получите URL: `https://finansowy-tracker-production.up.railway.app`
-
-### 3. Автоматические обновления
-
-Railway автоматически будет:
-- Слушать изменения в GitHub `main` ветке
-- Пересобирать и перезапускать приложение
-- Сохранять данные в persistent volume (база данных)
-
-### 4. Проверка статуса
+### Backend
 
 ```bash
-# Проверить что сервер живой
-curl https://finansowy-tracker-production.up.railway.app/health
+cd backend
+npm install
+npm start
 
-# Ожидаемый ответ:
-# {
-#   "success": true,
-#   "status": "healthy",
-#   "service": "finansowy-tracker-backend",
-#   "version": "2.0.0"
-# }
+# Сервер запустится на http://localhost:3001
+# Проверить: curl http://localhost:3001/health
 ```
 
-### 5. Просмотр логов
+### Frontend - Web
 
-1. Открыть Railway dashboard
-2. Выбрать проект "finansowy-tracker"
-3. Выбрать сервис "backend"
-4. Открыть tab "Logs"
+```bash
+cd finansowy-tracker
+npm install
+npm start
 
----
+# Выбрать 'w' для Web версии
+# Откроется на http://localhost:8081
+```
 
-## 📱 Frontend Deployment
-
-### Option 1: Expo Go (для тестирования)
+### Frontend - iOS (на Mac)
 
 ```bash
 cd finansowy-tracker
 npm install
 npx expo start
 
-# Откроется интерактивное меню
-# Отсканировать QR code с Expo Go приложением
+# Выбрать 'i' для iOS
+# Откроется iOS Simulator
 ```
 
-### Option 2: Expo EAS Build (для production)
+### Frontend - Android
 
 ```bash
-# Установить EAS CLI
-npm install -g eas-cli
+cd finansowy-tracker
+npm install
+npx expo start
 
-# Авторизоваться
-eas login
-
-# Собрать для iOS
-eas build --platform ios
-
-# Собрать для Android
-eas build --platform android
-
-# Собрать для Web
-eas build --platform web
+# Выбрать 'a' для Android
+# Откроется Android Emulator
 ```
 
-### Option 3: React Native Web (простой способ)
+---
+
+## 📦 APK Generation (Production Build)
+
+### Требования
+
+- **Android Studio** или **Android SDK** установлены
+- **Java JDK** >= 11
+- **Node.js** >= 18
+
+### Способ 1: Через EAS Build (рекомендуется)
+
+```bash
+# 1. Установить EAS CLI
+npm install -g eas-cli
+
+# 2. Авторизоваться (нужен аккаунт на Expo)
+eas login
+
+# 3. Инициализировать EAS в проекте
+cd finansowy-tracker
+eas build:configure
+
+# 4. Собрать APK для Android
+eas build --platform android --local
+
+# 5. Скачать APK
+# После завершения получите ссылку на download
+
+# 6. Установить на устройство/эмулятор
+adb install ./app-release.apk
+```
+
+### Способ 2: Локальная сборка через Expo
 
 ```bash
 cd finansowy-tracker
 
-# Build for production
-npm run build:web
+# Создать производственный билд для Android
+eas build --platform android --local
 
-# Будет создана папка build/ которую можно хостить на:
-# - Vercel
-# - Netlify
-# - Firebase Hosting
-# - GitHub Pages
+# Или экспортировать для локальной сборки
+npx expo prebuild --clean
 
-# Пример развертывания на Vercel:
-npm install -g vercel
-vercel --prod ./build
+# Затем собрать через Gradle
+cd android
+./gradlew assembleRelease
 ```
 
----
-
-## 🔗 Обновление Frontend конфигурации
-
-После развертывания backend, обновите URL в frontend:
-
-**Файл:** `finansowy-tracker/src/services/SyncService.js`
-
-```javascript
-const API_BASE_URL = 'https://finansowy-tracker-production.up.railway.app/api';
-```
-
-**Файл:** `finansowy-tracker/src/services/AnalyticsService.js`
-
-```javascript
-const API_BASE_URL = 'https://finansowy-tracker-production.up.railway.app/api';
-```
-
-После изменения:
+### Способ 3: Через React Native CLI
 
 ```bash
-git add .
-git commit -m "chore: Update backend API URL to production"
-git push origin main
+cd finansowy-tracker
+
+# Генерировать Android проект
+npx react-native init FinansowyTracker --version 0.73
+
+# Собрать APK
+cd android
+./gradlew assembleRelease
+
+# APK будет в: app/build/outputs/apk/release/app-release.apk
 ```
 
-Railway автоматически пересоберет фронтенд с новым URL.
+---
+
+## 🔧 Конфигурация для Build
+
+### app.json (финансово-tracker)
+
+```json
+{
+  "expo": {
+    "name": "Finansowy Tracker",
+    "slug": "finansowy-tracker",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.finansowytracker.app"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 21,
+            "targetSdkVersion": 33,
+            "compileSdkVersion": 33
+          }
+        }
+      ]
+    ]
+  }
+}
+```
 
 ---
 
-## 🔐 Security Checklist
+## 📱 Установка APK на устройство
 
-- [ ] Переменная `NODE_ENV` установлена в `production`
-- [ ] `CORS_ORIGIN` установлена на конкретный домен (не *)
-- [ ] База данных регулярно backup'ится (Railway делает это автоматически)
-- [ ] Логи не содержат чувствительных данных
-- [ ] Все input валидируется на backend
-- [ ] Пароли/ключи не в git (используются .env переменные)
-- [ ] HTTPS используется везде
-
----
-
-## 📊 Мониторинг
-
-### Railway Monitoring
-
-Railway предоставляет встроенные инструменты:
-- Response time graphs
-- Error rate tracking
-- Resource usage (CPU, memory)
-- Deployment history
-
-### Custom Monitoring
+### На Android Emulator
 
 ```bash
-# Периодически проверить здоровье
-curl -s https://finansowy-tracker-production.up.railway.app/health | jq '.status'
+# 1. Запустить эмулятор
+emulator -avd Nexus_5_API_30
+
+# 2. Установить APK
+adb install finansowy-tracker.apk
+
+# 3. Запустить
+adb shell am start -n com.finansowytracker.app/.MainActivity
 ```
+
+### На физическом Android устройстве
+
+```bash
+# 1. Включить USB Debug Mode на устройстве
+# Settings > Developer Options > USB Debugging
+
+# 2. Подключить устройство к компьютеру
+adb devices
+
+# 3. Установить APK
+adb install finansowy-tracker.apk
+```
+
+---
+
+## 🗄️ Локальный Backend
+
+Backend работает полностью локально без облачного деплоя:
+
+```bash
+cd backend
+
+# Установить зависимости
+npm install
+
+# Создать .env файл
+cp .env.example .env
+
+# Запустить
+npm start
+
+# Server будет на http://localhost:3001
+```
+
+**База данных хранится локально:** `backend/data/tracker.db`
+
+Приложение автоматически подключится к локальному backend.
+
+---
+
+## ✅ Checklist перед сборкой APK
+
+- [ ] Backend запускается без ошибок
+- [ ] Frontend запускается на Web (npm start > w)
+- [ ] Нет console errors/warnings
+- [ ] Все 3 языка работают
+- [ ] Dark/Light theme работают
+- [ ] Аналитика считает правильно
+- [ ] Синхронизация работает локально
+- [ ] API endpoints отвечают правильно
+- [ ] Версия в app.json обновлена (package.json синхронизирована)
+
+---
+
+## 📊 Размер APK
+
+Ожидаемые размеры:
+
+- **Debug APK**: ~150-200 MB
+- **Release APK**: ~60-80 MB
+
+Release версия значительно меньше благодаря минификации.
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Problem: Build fails on Railway
+### Problem: Build fails
 
-**Решение:**
-1. Проверить что `package.json` в корне backend папки
-2. Убедиться что все dependencies установлены
-3. Проверить логи в Railway dashboard
-4. Если нужно, добавить `buildScript` в `package.json`
+```bash
+# Очистить кэш
+npm cache clean --force
 
-### Problem: Database не сохраняется
+# Удалить node_modules
+rm -rf node_modules
+npm install
 
-**Решение:**
-- Railway автоматически создает persistent volume
-- По умолчанию хранится в `/app/data/tracker.db`
-- Если нужен backup, скачайте файл через Railway dashboard
+# Попробовать заново
+eas build --platform android --local
+```
 
-### Problem: CORS ошибки
+### Problem: APK не устанавливается
 
-**Решение:**
-1. Проверить что `CORS_ORIGIN` правильно установлена
-2. Убедиться что frontend отправляет правильные headers
-3. Перезагрузить backend: `eas update`
+```bash
+# Проверить что Android SDK установлена
+adb version
 
-### Problem: API отвечает 500 ошибкой
+# Проверить что устройство подключено
+adb devices
 
-**Решение:**
-1. Проверить логи в Railway
-2. Убедиться что база данных инициализирована
-3. Проверить что запрос содержит корректный `x-user-id` header
+# Установить с флагами
+adb install -r finansowy-tracker.apk
+```
 
----
+### Problem: App crashes на старте
 
-## 📋 Deployment Checklist
-
-Before going live:
-
-- [ ] Все tests passed локально
-- [ ] Backend deploy успешен
-- [ ] Health check работает
-- [ ] Frontend подключена к production backend
-- [ ] Все 3 языка работают
-- [ ] Синхронизация работает
-- [ ] Аналитика считает правильно
-- [ ] Error handling работает
-- [ ] No console errors/warnings
-- [ ] Документация актуальна
+1. Проверить что backend запущена на localhost:3001
+2. Проверить что база данных инициализирована
+3. Проверить logcat: `adb logcat | grep finansowy`
 
 ---
 
-## 📞 Support
+## 📋 Файлы для сдачи
 
-For Railway issues:
-- Railway docs: https://docs.railway.app
-- Railway status: https://status.railway.app
+Подготовьте следующие файлы:
 
-For code issues:
-- See GitHub Issues: https://github.com/AniSary/DyplomVadymDymov
+```
+DyplomVadymDymov/
+├── backend/                    # Полный backend код
+├── finansowy-tracker/          # Полное фронтенд приложение
+├── TESTING_GUIDE.md           # Гайд тестирования
+├── PROJECT_README.md          # Описание проекта
+├── QUICKSTART_GUIDE.md        # Быстрый старт
+├── app-release.apk            # Готовый APK (опционально)
+└── README.md                  # Главный README
+```
 
 ---
 
-## 🔄 Post-Deployment
+## 🎯 Сдача проекта
 
-1. **Tell users the new URL:**
-   ```
-   Backend: https://finansowy-tracker-production.up.railway.app
-   ```
+1. **Git repository** - все на GitHub (готово ✅)
+2. **Рабочий код** - backend + frontend (готово ✅)
+3. **APK** - собрано локально через eas build или gradle
+4. **Документация** - TESTING_GUIDE.md + гайды (готово ✅)
+5. **Запуск инструкции** - этот файл
 
-2. **Update any documentation** with new URLs
+Проект полностью готов! 🎉
 
-3. **Test all features** on production environment
-
-4. **Monitor for issues** in first week
-
-5. **Set up monitoring alerts** (optional through Railway)

@@ -178,7 +178,6 @@ router.get('/recommendations', async (req, res) => {
     });
   }
 });
-});
 
 /**
  * GET /api/analytics/comparison

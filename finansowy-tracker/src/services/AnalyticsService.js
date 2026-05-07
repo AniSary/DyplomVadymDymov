@@ -1,7 +1,7 @@
 // src/services/AnalyticsService.js
 // Сервис для получения продвинутой аналитики с backend сервера
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://finansowy-tracker-production.up.railway.app/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export class AnalyticsService {
   constructor(userId) {

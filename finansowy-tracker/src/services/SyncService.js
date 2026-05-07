@@ -3,7 +3,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://finansowy-tracker-production.up.railway.app/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export class SyncService {
   constructor(userId, deviceId = null) {
