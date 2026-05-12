@@ -9,7 +9,7 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  ScrollView,
   SafeAreaView,
   TouchableOpacity,
   Alert,
@@ -77,37 +77,6 @@ const TransactionsScreen = ({ navigation }) => {
     navigation.navigate('AddTransaction', { transaction });
   };
 
-  const renderTransactionGroup = ({ item: dateKey }) => {
-    const transactionsForDate = sortedTransactions[dateKey];
-    
-    return (
-      <View key={dateKey}>
-        <View style={styles.dateHeader}>
-          <Text style={styles.dateText}>{dateKey}</Text>
-        </View>
-        
-        {transactionsForDate.map(transaction => {
-          const category = categories.find(c => c.id === transaction.categoryId);
-          
-          return (
-            <TouchableOpacity
-              key={transaction.id}
-              onPress={() => handleEdit(transaction)}
-              onLongPress={() => handleDelete(transaction.id)}
-              delayLongPress={500}
-            >
-              <TransactionItem
-                transaction={transaction}
-                category={category}
-                currency={settings.currency}
-              />
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    );
-  };
-
   const dateKeys = Object.keys(sortedTransactions);
 
   return (
@@ -145,13 +114,41 @@ const TransactionsScreen = ({ navigation }) => {
 
       {/* Lista transakcji */}
       {dateKeys.length > 0 ? (
-        <FlatList
-          data={dateKeys}
-          renderItem={renderTransactionGroup}
-          keyExtractor={item => item}
-          scrollEnabled={false}
-          ListContainerComponent={View}
-        />
+        <ScrollView 
+          style={styles.contentContainer}
+          showsVerticalScrollIndicator={true}
+        >
+          {dateKeys.map((dateKey) => {
+            const transactionsForDate = sortedTransactions[dateKey];
+            
+            return (
+              <View key={dateKey}>
+                <View style={styles.dateHeader}>
+                  <Text style={styles.dateText}>{dateKey}</Text>
+                </View>
+                
+                {transactionsForDate.map(transaction => {
+                  const category = categories.find(c => c.id === transaction.categoryId);
+                  
+                  return (
+                    <TouchableOpacity
+                      key={transaction.id}
+                      onPress={() => handleEdit(transaction)}
+                      onLongPress={() => handleDelete(transaction.id)}
+                      delayLongPress={500}
+                    >
+                      <TransactionItem
+                        transaction={transaction}
+                        category={category}
+                        currency={settings.currency}
+                      />
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            );
+          })}
+        </ScrollView>
       ) : (
         <EmptyState
           icon="📭"
@@ -221,6 +218,10 @@ const makeStyles = (theme) =>
     },
     filterTextActive: {
       color: '#FFFFFF',
+    },
+    contentContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
     },
     dateHeader: {
       paddingVertical: 8,

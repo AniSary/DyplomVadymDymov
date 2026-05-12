@@ -84,7 +84,7 @@ const DashboardScreen = ({ navigation }) => {
 
       <ScrollView
         style={styles.content}
-        showsVerticalScrollIndicator={Boolean(false)}
+        showsVerticalScrollIndicator={true}
       >
         {/* Основная информация */}
         <Card
