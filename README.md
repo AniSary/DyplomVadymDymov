@@ -1,10 +1,10 @@
-# Finansowy Tracker
+# Spendly
 
 Personal finance management application built with React Native and Expo.
 
 ## About
 
-Finansowy Tracker is a mobile application for tracking financial transactions, analyzing spending patterns, and managing personal budgets. The app provides comprehensive analytics, category-based organization, and multi-language support.
+Spendly is a mobile application for tracking financial transactions, analyzing spending patterns, and managing personal budgets. The app provides comprehensive analytics, category-based organization, and multi-language support.
 
 ## Key Features
 

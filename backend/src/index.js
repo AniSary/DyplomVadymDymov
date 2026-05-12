@@ -49,7 +49,7 @@ app.get('/health', (req, res) => {
     success: true,
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'finansowy-tracker-backend',
+    service: 'spendly-backend',
     version: '2.0.0',
     environment: NODE_ENV,
     uptime: process.uptime()
@@ -102,7 +102,7 @@ async function startServer() {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`
 ╔════════════════════════════════════════════════╗
-║   Finansowy Tracker Backend Server Running     ║
+║     Spendly Backend Server Running             ║
 ╠════════════════════════════════════════════════╣
 ║                                                ║
 ║  📍 Listening on: http://localhost:${PORT}

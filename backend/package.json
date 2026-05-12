@@ -1,7 +1,7 @@
 {
-  "name": "finansowy-tracker-backend",
+  "name": "spendly-backend",
   "version": "1.0.0",
-  "description": "Backend for Finansowy Tracker with sync and analytics",
+  "description": "Backend for Spendly with sync and analytics",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
